@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="map" style="height: 800px"></div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBE3_KcCXDP6Jlsh3m0375akqXfEZmCIwc"></script>
+
+    <script>
+      const map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 53.56138179385537, lng: 9.970350573224191 },
+        zoom: 5,
+      });
+
+      const markers = [];
+
+      function getRandomCoordinates() {
+        const minLat = 45;
+        const maxLat = 54;
+        const minLng = 5;
+        const maxLng = 30;
+
+        const randomLat = Math.random() * (maxLat - minLat) + minLat;
+        const randomLng = Math.random() * (maxLng - minLng) + minLng;
+
+        return { lat: randomLat, lng: randomLng };
+      }
+
+      function addRandomMarkers() {
+        for (let i = 0; i < 200; i++) {
+          const coordinates = getRandomCoordinates();
+          const marker = new google.maps.Marker({
+            position: coordinates,
+            map: map,
+          });
+
+          marker.addListener("click", function () {
+            alert(
+              `Marker ${i + 1} clicked at ${coordinates.lat}, ${
+                coordinates.lng
+              }`,
+            );
+          });
+
+          markers.push(marker);
+        }
+      }
+
+      addRandomMarkers();
+    </script>
+  </body>
+</html>
