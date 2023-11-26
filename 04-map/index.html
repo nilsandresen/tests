@@ -8,15 +8,16 @@
   <body>
     <div id="map" style="height: 800px"></div>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBE3_KcCXDP6Jlsh3m0375akqXfEZmCIwc"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBE3_KcCXDP6Jlsh3m0375akqXfEZmCIwc&libraries=geometry"></script>
 
     <script>
       const map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 53.56138179385537, lng: 9.970350573224191 },
-        zoom: 5,
+        center: { lat: 49.608, lng: 18.402 },
+        zoom: 6
       });
 
       const markers = [];
+      let polylines = [];
 
       function getRandomCoordinates() {
         const minLat = 45;
@@ -36,18 +37,63 @@
           const marker = new google.maps.Marker({
             position: coordinates,
             map: map,
+            label: i.toString()
           });
 
           marker.addListener("click", function () {
-            alert(
-              `Marker ${i + 1} clicked at ${coordinates.lat}, ${
-                coordinates.lng
-              }`,
-            );
+            clearPolylines();
+            findClosestMarkers(markers[i], markers);
           });
 
           markers.push(marker);
         }
+      }
+
+      function findClosestMarkers(
+        targetMarker,
+        allMarkers,
+        numberOfClosestMarkers = 10
+      ) {
+        let closestMarkers = [];
+
+        allMarkers.forEach(function (marker) {
+          let distance = calculateDistance(
+            targetMarker.getPosition(),
+            marker.getPosition()
+          );
+          closestMarkers.push({ marker: marker, distance: distance });
+        });
+
+        closestMarkers.sort(function (a, b) {
+          return a.distance - b.distance;
+        });
+
+        closestMarkers
+          .slice(1, numberOfClosestMarkers + 1)
+          .map(function (item) {
+            return item.marker;
+          })
+          .forEach((marker) => {
+            const line = new google.maps.Polyline({
+              path: [targetMarker.position, marker.position],
+              map: map
+            });
+            polylines.push(line);
+          });
+      }
+
+      function calculateDistance(point1, point2) {
+        return google.maps.geometry.spherical.computeDistanceBetween(
+          point1,
+          point2
+        );
+      }
+
+      function clearPolylines() {
+        polylines.forEach(function (polyline) {
+          polyline.setMap(null);
+        });
+        polylines = [];
       }
 
       addRandomMarkers();
